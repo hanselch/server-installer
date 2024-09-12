@@ -1,0 +1,13 @@
+drive-url:
+  main-mods-zip: https://drive.google.com/file/d/1-2Fi1tn8YtFJC9DFV5CWgbdNkVGNaReC/view?usp=sharing
+  world-download: ""
+mod-dir: ""
+mods-to-delete:
+  with-shaders: DistantHorizons-2.2.1-a-1.20.1-forge-fabric.jar
+  without-shaders:
+  - iris-1.7.2+mc1.20.1.jar
+  - GeckoLibIrisCompat-Fabric-1.0.0.jar
+shaders-installed: false
+version:
+  debug: a0
+  main-build: Alpha-0.1
