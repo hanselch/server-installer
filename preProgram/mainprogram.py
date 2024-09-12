@@ -45,9 +45,9 @@ class App():
         if program == 1:
             self.installing_mods()
         elif program == 2:
-            print("Shaders")
+            self.installing_shaders()
         elif program == 3:
-            print("World")
+            self.installing_world()
     
     def installing_mods(self):
         mod_installer_app = tk.Toplevel(self.master)
@@ -113,9 +113,9 @@ class App():
         ttk.Button(mod_installer_app, text="Go!", command=whatNext).grid(column=1,columnspan=2,row=7)
     
     def installing_shaders(self):
-        pass
+        messagebox.askokcancel(message="As of v0.1-alpha, this option is not available yet.")
     def installing_world(self):
-        pass
+        messagebox.askokcancel(message="As of v0.1-alpha, this option is not available yet.")
     
     def install_mods(self, mod_directory, add_shaders):
         Shaders = None
