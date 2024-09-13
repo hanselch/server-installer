@@ -1,5 +1,8 @@
-import sys,os
+import sys,os,getpass,yaml
 import tkinter as tk
+
+currentUser = getpass.getuser()
+print(currentUser)
 
 currentDir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, f"{currentDir}\\preProgram")
@@ -16,9 +19,13 @@ Hansel Chavez (\033[94m@tardiobscurus\033[0m in discord)
 -=====================================---
 """)
 
-if len(data['mod-dir']) == 0:
-    print("-=[ \033[93mINFO\033[0m ]=-")
-    print("Seems like the option in your `settings.yaml`;\n`mod-dir` has no value. Make sure to set a\ndefault for the mods directory when installing\nor updating the mods.")
+modsFolder = f"C:\\Users\\{currentUser}\\AppData\\Roaming\\.minecraft\\mods"
+if not os.path.isdir(modsFolder):
+    print(f"Adding the mods folder under\nC:\\Users\\{currentUser}\\AppData\\Roaming\\.minecraft\\mods")
+    with open(f"{currentDir}\\preProgram\\settings.yaml", "w") as file:
+        data["mod-dir"] = modsFolder
+        yaml.dump(data, file)
+    os.mkdir(modsFolder)
 
 import mainprogram # type: ignore
 mainprogram.App(tk.Tk())

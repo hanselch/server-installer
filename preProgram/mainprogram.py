@@ -3,7 +3,8 @@ from tkinter import ttk, filedialog, messagebox, END
 from getsettings import data
 import os
 import yaml # type: ignore
-import gdown, zipfile # type: ignore
+import gdown, zipfile, shutil, glob # type: ignore
+import pathlib
 
 current_version = data["version"]["main-build"]
 
@@ -101,9 +102,9 @@ class App():
             if type == "install":
                 self.install_mods(dir, shaders)
             elif type == "update":
-                self.update_mods()
+                self.update_mods(dir, shaders)
             elif type == "delete":
-                self.delete_mods()
+                self.delete_mods(dir)
             else:
                 messagebox.askokcancel(message="You need to choose the type of installation.")
                 
@@ -118,6 +119,21 @@ class App():
         messagebox.askokcancel(message="As of v0.1-alpha, this option is not available yet.")
     
     def install_mods(self, mod_directory, add_shaders):
+        if any(pathlib.Path(mod_directory).iterdir()):
+            filesInDir = glob.glob(mod_directory+"/*")
+            print(filesInDir)
+            saveMods =  messagebox.askyesno(message="To continue forwards, we need the mods folder to be empty. Would you like to save the current mods you have in the folder, in a seperate zip file?")
+            if saveMods:
+                print("Making zip file for old mods")
+                shutil.make_archive("oldMods", 'zip', self.currentDir)
+                print(f"Made {self.currentDir}/oldMods.zip")
+
+                print("")
+
+                print("Deleting mods in selected mods folder...")
+                for mod in filesInDir:
+                    os.remove(mod)
+
         Shaders = None
         if add_shaders == 1:
             Shaders = True
@@ -163,12 +179,31 @@ class App():
         messagebox.askokcancel(message="Mods are successfully installed in your mods folder!\nClosing the program, now.")
         self.master.destroy()
         
-    def update_mods(self):
-        pass
-    
-    def delete_mods(self):
-        pass
+    def update_mods(self, mod_directory, add_shaders):
+        zipfile_dir = mod_directory+"\\mods.zip"
+        print("Downloading the `mods.zip`, from google drive.")
+        gdown.download(data["drive-url"]["main-mods-zip"], zipfile_dir, fuzzy=True)
+        print(f"Downloaded, {mod_directory}!")
+        if add_shaders == 1:
+            os.remove(mod_directory+"\\"+data["mods-to-delete"]["with-shaders"])
+            print(f"Deleted, {data['mods-to-delete']['with-shaders']}")
+        elif add_shaders == 0:
+            for i in data["mods-to-delete"]["without-shaders"]:
+                os.remove(mod_directory+"\\"+i)
+                print(f"Deleted, {i}")
+        messagebox.askokcancel(message="Mods are successfully updated in your mods folder!\nClosing the program, now.")
+        self.master.destroy()
 
+    def delete_mods(self, mod_directory):
+        deleteAll = messagebox.askyesno(message="You are about to delete all the mods in the selected folder. Would you like to proceed?")
+        if deleteAll:
+            print(f"Deleting all mods in {mod_directory}")
+            filesInDir = glob.glob(mod_directory+"/*")
+            for mod in filesInDir:
+                os.remove(mod)
+            messagebox.askokcancel(message=f"Removed all the mods in\n{mod_directory}\nClosing the program now.")
+            self.master.destroy()
+            
     def choose_dir(self):
         selectedModsDir = filedialog.askdirectory(initialdir=data["mod-dir"], mustexist=True)
 
