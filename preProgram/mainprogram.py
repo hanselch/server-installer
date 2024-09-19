@@ -14,102 +14,106 @@ class App():
         self.currentDir = os.path.dirname(os.path.realpath(__file__))
         super().__init__()
 
-        self.static_top()
-        self.option_window(0)
+        # For the main window, when the user opne the program
+        self.main_window(0)
 
-    def static_top(self):
+    def options(self, window, options_list: dict[str, str], column: int, row: int, valVar):
+        for (text,value) in options_list.items():
+            option = ttk.Radiobutton(window, text=text, value=value, variable=valVar)
+            option.grid(column=column, row=row)
+            # for the options_window in line 34
+            if data["shaders-installed"] == False and text == "Setup Shaders":
+                option.config(state="disabled")
+            row+=1
+
+    def main_window(self, column):
         self.master.title(f"Server Installer | v. {current_version}")
         ttk.Label(self.master, text=f"Server Installer v. {current_version}", 
                  font=("Arial", 15)).grid(row=0)
-
-    def option_window(self, column):
         ttk.Label(self.master, text="What would you like to do?").grid(column=column,row=1)
+        def selected():
+            program = int(self.chosenOption.get())
+            if program == 1:
+                self.installing_mods()
+            elif program == 2:
+                self.installing_shaders()
+            elif program == 3:
+                self.installing_world()
         options = {"Setup Mods": 1, "Setup Shaders": 2, "Install World": 3}
         self.chosenOption = tk.StringVar()
         irow = 2
-        for (text, value) in options.items():
-            selectedOption = ttk.Radiobutton(self.master, text = text, width=15,
-                                             value=value,
-                                             variable=self.chosenOption)
-            selectedOption.grid(column=column, row=irow)
-            if data["shaders-installed"] == False and text == "Setup Shaders":
-                selectedOption.config(state="disabled")
-            else:
-                selectedOption.config(state="normal")
-            irow+=1
+        self.options(self.master, options, column, irow, self.chosenOption)
+        ttk.Button(self.master, text="Go!", command=selected).grid(column=column, row=5)
         
-        ttk.Button(self.master, text="Go!", command=self.selected).grid(column=column, row=irow+1)
+    def entryBoxDir(self, window, row, variable, type: int):
+        modDirEntry = ttk.Entry(window, textvariable=variable, width=50)
+        dirData = data['directories']
+        # for mods dir
+        if type == 1:
+            if dirData["mod-directory"] != "":
+                modDirEntry.insert(0, dirData["mod-directory"])
+        # for shaders
+        elif type == 2:
+            print("for shaders")
+        modDirEntry.grid(column=0, columnspan=3, row=row)
 
-    def selected(self):
-        program = int(self.chosenOption.get())
-
-        if program == 1:
-            self.installing_mods()
-        elif program == 2:
-            self.installing_shaders()
-        elif program == 3:
-            self.installing_world()
-    
+        selectedModsDirectory = None
+        def getModDir():
+            selectedModsDirectory = filedialog.askdirectory(initialdir="/", mustexist="true")
+            if selectedModsDirectory != "":
+                modDirEntry.delete(0, END)
+                modDirEntry.insert(0,selectedModsDirectory)
+                if selectedModsDirectory != dirData["mod-directory"]:
+                    changeSetting = messagebox.askyesno(message=f"Would you like to set\n{selectedModsDirectory}\nas your new default for future installations?")
+                    if changeSetting:
+                        with open(f"{self.currentDir}\\settings.yaml", "w") as settings:
+                            dirData["mod-directory"] = selectedModsDirectory
+                            yaml.dump(data, settings)
+                        
+        getData = ttk.Button(window, command=getModDir, text="...")
+        getData.grid(column=4, row=row)
+            
     def installing_mods(self):
         mod_installer_app = tk.Toplevel(self.master)
-        mod_installer_app.title("Mod Loader v.1")
-        
-        ttk.Separator()
+        mod_installer_app.title("Mod Loader v1.1")
 
-        self.modsDir = ttk.Entry(mod_installer_app, width=50)
-        self.modsDir.grid(column=0, columnspan=3, row=1)
-        self.modsDir.insert(0,data["mod-dir"])
-        ttk.Button(mod_installer_app, text="...", command=self.choose_dir).grid(column=3,row=1)
+        entryVar = tk.StringVar()
+        self.entryBoxDir(mod_installer_app, 0, entryVar, 1)
         
-        ttk.Separator()
-
-        installation_option = {
-            "Install Mods": "install",
-            "Update Mods": "update",
-            "Delete Mods (Debug)": "delete",
-        }
+        installation_option = { "Install Mods": "install", "Update Mods": "update", "Delete Mods (Debug)": "delete"}
         ttk.Label(mod_installer_app, text="What would you like to do?").grid(column=1,row=2)
         irow = 3
-        self.chosenType = tk.StringVar()
-        for (text, value) in installation_option.items():
-            type = ttk.Radiobutton(mod_installer_app, text=text, value=value, variable=self.chosenType, width=20)
-            type.grid(column=1, row=irow)
-            irow += 1
-        
-        shaders_options = {
-            "Yes": 1,
-            "No": 0,
-        }
+        chosenType = tk.StringVar()
+        self.options(mod_installer_app, installation_option, 1, irow, chosenType) 
+
+        shaders_options = {"Yes": 1, "No": 0}
         ttk.Label(mod_installer_app, text="Shaders?").grid(column=2,row=2)
-        irow = 3
-        self.addShaders = tk.StringVar()
+        addShaders = tk.IntVar()
+        self.options(mod_installer_app, shaders_options, 2, 3, addShaders)
         if data["shaders-installed"] == True:
-            self.addShaders = tk.StringVar(value=1)
+            addShaders.set(1)
         elif data["shaders-installed"] == False:
-            self.addShaders = tk.StringVar(value=0)
-        for (text, value) in shaders_options.items():
-            shaders = ttk.Radiobutton(mod_installer_app, text=text, value=value, variable=self.addShaders, width=10)
-            shaders.grid(column=2,row=irow)
-            irow +=1
+            addShaders.set(0)
 
         ttk.Separator()
 
         def whatNext():
-            type = self.chosenType.get()
-            shaders = int(self.addShaders.get())
-            dir = self.modsDir.get()
-            
-            if type == "install":
-                self.install_mods(dir, shaders)
-            elif type == "update":
-                self.update_mods(dir, shaders)
-            elif type == "delete":
-                self.delete_mods(dir)
-            else:
-                messagebox.askokcancel(message="You need to choose the type of installation.")
-                
+            setupType = chosenType.get()
+            shaders = addShaders.get()
+            dir = entryVar.get()
+
             if len(dir) == 0:
                 messagebox.askokcancel(message="You need to enter the location of the mods folder to continue.")
+            else:
+                if setupType == "":
+                    messagebox.askokcancel(message="You need to select a 'type' of setup option to do!")
+                
+                if setupType == "install":
+                    self.install_mods(dir, shaders)
+                elif setupType == "update":
+                    self.update_mods(dir, shaders)
+                elif setupType == "delete":
+                    self.delete_mods(dir)
 
         ttk.Button(mod_installer_app, text="Go!", command=whatNext).grid(column=1,columnspan=2,row=7)
     
@@ -118,30 +122,26 @@ class App():
     def installing_world(self):
         messagebox.askokcancel(message="As of v0.1-alpha, this option is not available yet.")
     
-    def install_mods(self, mod_directory, add_shaders):
+    def install_mods(self, mod_directory, add_shaders: int):
+        filesInDir = glob.glob(mod_directory+"/*")
         if any(pathlib.Path(mod_directory).iterdir()):
-            filesInDir = glob.glob(mod_directory+"/*")
-            print(filesInDir)
             saveMods =  messagebox.askyesno(message="To continue forwards, we need the mods folder to be empty. Would you like to save the current mods you have in the folder, in a seperate zip file?")
             if saveMods:
                 print("Making zip file for old mods")
                 shutil.make_archive("oldMods", 'zip', self.currentDir)
                 print(f"Made {self.currentDir}/oldMods.zip")
-
-                print("")
-
                 print("Deleting mods in selected mods folder...")
                 for mod in filesInDir:
                     os.remove(mod)
-
+            else:
+                for mod in filesInDir:
+                    os.remove(mod)
         Shaders = None
         if add_shaders == 1:
             Shaders = True
             if data["shaders-installed"] == False:
-                print("The data says it's you should not install")
                 setShader = messagebox.askyesno(message="Would you like to set default on shaders (add shaders) for future installation?")
                 if setShader:
-                    print("Setting the data to match installation to true")
                     with open(f"{self.currentDir}\\settings.yaml", "w") as file:
                         data["shaders-installed"] = Shaders
                         yaml.dump(data, file)
@@ -153,20 +153,16 @@ class App():
                     with open(f"{self.currentDir}\\settings.yaml", "w") as file:
                         data["shaders-installed"] = Shaders
                         yaml.dump(data, file)
-
         zipfile_dir = mod_directory+"\\mods.zip"
-
         print("Downloading the `mods.zip`, from google drive.")
         gdown.download(data["drive-url"]["main-mods-zip"], zipfile_dir, fuzzy=True)
         print(f"Downloaded, {mod_directory}!")
-        
         # Unzip and add to folder
         print("Extracting `mods.zip` folder.")
         with zipfile.ZipFile(zipfile_dir, 'r') as zip_file:
             zip_file.extractall(mod_directory)
         os.remove(zipfile_dir)
         print("Removed the `mods.zip` folder...")
-
         # Checking if the folder contains the files, based on whether the user wanted shaders or not
         if Shaders:
             os.remove(mod_directory+"\\"+data["mods-to-delete"]["with-shaders"])
@@ -175,14 +171,21 @@ class App():
             for i in data["mods-to-delete"]["without-shaders"]:
                 os.remove(mod_directory+"\\"+i)
                 print(f"Deleted, {i}")
-        
         messagebox.askokcancel(message="Mods are successfully installed in your mods folder!\nClosing the program, now.")
         self.master.destroy()
         
     def update_mods(self, mod_directory, add_shaders):
         zipfile_dir = mod_directory+"\\mods.zip"
+        print("Deleting the original mods...")
+        filesInDir = glob.glob(mod_directory+"/*")
+        for mod in filesInDir:
+            os.remove(mod)
         print("Downloading the `mods.zip`, from google drive.")
         gdown.download(data["drive-url"]["main-mods-zip"], zipfile_dir, fuzzy=True)
+        print("Extracting `mods.zip` folder.")
+        with zipfile.ZipFile(zipfile_dir, 'r') as zip_file:
+            zip_file.extractall(mod_directory)
+        os.remove(zipfile_dir)
         print(f"Downloaded, {mod_directory}!")
         if add_shaders == 1:
             os.remove(mod_directory+"\\"+data["mods-to-delete"]["with-shaders"])
@@ -203,17 +206,3 @@ class App():
                 os.remove(mod)
             messagebox.askokcancel(message=f"Removed all the mods in\n{mod_directory}\nClosing the program now.")
             self.master.destroy()
-            
-    def choose_dir(self):
-        selectedModsDir = filedialog.askdirectory(initialdir=data["mod-dir"], mustexist=True)
-
-        self.modsDir.delete(0,END)
-        self.modsDir.insert(0,selectedModsDir)
-
-        if selectedModsDir != data["mod-dir"]:
-            setDefault = messagebox.askyesno(message=f"The directory below, is not set as a default:\n{selectedModsDir}\nWould you like to set it as a default to your `settings.yaml` file?")
-            
-            if setDefault == True:
-                with open(f"{self.currentDir}\\settings.yaml", "w") as file:
-                    data["mod-dir"] = selectedModsDir
-                    yaml.dump(data, file)
