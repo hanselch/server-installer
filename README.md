@@ -4,6 +4,9 @@
 A simple Python v3 mod installer using [Tkinter](https://tkdocs.com/resources/backgrounder.html). This is a seperate repo of the [original program](https://github.com/hanselch/mod-installer) with more features and better code.
 
 This is was originally ment to help close friends install mods easily and get back in to the game faster! The project later evolved in to an intuative program for any modpack not using external sites, such as CurseForge or Modrinth.
+
+For info on the program and server, go to the [wiki](https://github.com/hanselch/server-installer/wiki).
+
 ## Features
 
 This is a very simple program adding the following:
