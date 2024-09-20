@@ -1,4 +1,4 @@
-import sys,os,getpass,yaml
+import sys,os,getpass
 import tkinter as tk
 
 currentUser = getpass.getuser()
@@ -9,6 +9,8 @@ from getsettings import data # type: ignore
 import validatemodules # type: ignore
 
 validatemodules.get_requirements()
+
+import yaml
 
 modsFolder = f"C:\\Users\\{currentUser}\\AppData\\Roaming\\.minecraft\\mods"
 if not os.path.isdir(modsFolder):
