@@ -6,7 +6,7 @@ import yaml # type: ignore
 import gdown, zipfile, shutil, glob # type: ignore
 import pathlib
 
-current_version = data["version"]["main-build"]
+current_version = data["version"]
 
 class App():
     def __init__(self, master):
@@ -57,7 +57,7 @@ class App():
             print("for shaders")
         modDirEntry.grid(column=0, columnspan=3, row=row)
 
-        selectedModsDirectory = None
+        selectedModsDirectory = ""
         def getModDir():
             selectedModsDirectory = filedialog.askdirectory(initialdir="/", mustexist="true")
             if selectedModsDirectory != "":
@@ -75,7 +75,6 @@ class App():
             
     def installing_mods(self):
         mod_installer_app = tk.Toplevel(self.master)
-        mod_installer_app.title("Mod Loader v1.1")
 
         entryVar = tk.StringVar()
         self.entryBoxDir(mod_installer_app, 0, entryVar, 1)
@@ -86,16 +85,14 @@ class App():
         chosenType = tk.StringVar()
         self.options(mod_installer_app, installation_option, 1, irow, chosenType) 
 
-        shaders_options = {"Yes": 1, "No": 0}
+        shaders_options = {"Yes": True, "No": False}
         ttk.Label(mod_installer_app, text="Shaders?").grid(column=2,row=2)
-        addShaders = tk.IntVar()
+        addShaders = tk.BooleanVar()
         self.options(mod_installer_app, shaders_options, 2, 3, addShaders)
         if data["shaders-installed"] == True:
-            addShaders.set(1)
+            addShaders.set(True)
         elif data["shaders-installed"] == False:
-            addShaders.set(0)
-
-        ttk.Separator()
+            addShaders.set(False)
 
         def whatNext():
             setupType = chosenType.get()
@@ -118,10 +115,26 @@ class App():
         ttk.Button(mod_installer_app, text="Go!", command=whatNext).grid(column=1,columnspan=2,row=7)
     
     def installing_shaders(self):
-        messagebox.askokcancel(message="As of v0.1-alpha, this option is not available yet.")
+        messagebox.askokcancel(message=f"As of {current_version}, this option is not available yet.")
     def installing_world(self):
-        messagebox.askokcancel(message="As of v0.1-alpha, this option is not available yet.")
+        messagebox.askokcancel(message=f"As of {current_version}, this option is not available yet.")
     
+    def download_item(self, url: str, file_location: str, file_name: str, shader: bool):
+        file = f"{file_location}\\{file_name}"
+        print("Installing mods via gdown...")
+        gdown.download(url, file, fuzzy=True)
+        print("Extracting mods.zip from Google Drive")
+        with zipfile.ZipFile(file, 'r') as zip_file:
+            zip_file.extractall(file_location)
+        os.remove(file)
+        if not shader:
+            for i in data["mods-to-delete"]["no-shaders"]:
+                os.remove(file_location+"\\"+i)
+                print(f"Deleted, {i}")
+        else:
+            os.remove(file_location+"\\"+data["mods-to-delete"]["yes-shaders"])
+            print(f"Deleted, {data['mods-to-delete']['yes-shaders']}")
+                
     def install_mods(self, mod_directory, add_shaders: int):
         filesInDir = glob.glob(mod_directory+"/*")
         if any(pathlib.Path(mod_directory).iterdir()):
@@ -136,64 +149,30 @@ class App():
             else:
                 for mod in filesInDir:
                     os.remove(mod)
-        Shaders = None
-        if add_shaders == 1:
-            Shaders = True
+        if add_shaders == True:
             if data["shaders-installed"] == False:
-                setShader = messagebox.askyesno(message="Would you like to set default on shaders (add shaders) for future installation?")
+                setShader = messagebox.askyesno(message="Would you like to set default on shaders (do add shaders) for future installation?")
                 if setShader:
                     with open(f"{self.currentDir}\\settings.yaml", "w") as file:
-                        data["shaders-installed"] = Shaders
+                        data["shaders-installed"] = True
                         yaml.dump(data, file)
-        if add_shaders == 0:
-            Shaders = False
+        if add_shaders == False:
             if data["shaders-installed"] == True:
-                setShader = messagebox.askyesno(message="Would you like to set default on shaders (no shaders) for future installation?")
+                setShader = messagebox.askyesno(message="Would you like to set default on shaders (do not add shaders) for future installation?")
                 if setShader:
                     with open(f"{self.currentDir}\\settings.yaml", "w") as file:
-                        data["shaders-installed"] = Shaders
+                        data["shaders-installed"] = False
                         yaml.dump(data, file)
-        zipfile_dir = mod_directory+"\\mods.zip"
-        print("Downloading the `mods.zip`, from google drive.")
-        gdown.download(data["drive-url"]["main-mods-zip"], zipfile_dir, fuzzy=True)
-        print(f"Downloaded, {mod_directory}!")
-        # Unzip and add to folder
-        print("Extracting `mods.zip` folder.")
-        with zipfile.ZipFile(zipfile_dir, 'r') as zip_file:
-            zip_file.extractall(mod_directory)
-        os.remove(zipfile_dir)
-        print("Removed the `mods.zip` folder...")
-        # Checking if the folder contains the files, based on whether the user wanted shaders or not
-        if Shaders:
-            os.remove(mod_directory+"\\"+data["mods-to-delete"]["with-shaders"])
-            print(f"Deleted, {data['mods-to-delete']['with-shaders']}")
-        else:
-            for i in data["mods-to-delete"]["without-shaders"]:
-                os.remove(mod_directory+"\\"+i)
-                print(f"Deleted, {i}")
+        self.download_item(data["drive-url"]['main-mods-zip'], mod_directory, "mods.zip", add_shaders)   
         messagebox.askokcancel(message="Mods are successfully installed in your mods folder!\nClosing the program, now.")
         self.master.destroy()
         
     def update_mods(self, mod_directory, add_shaders):
-        zipfile_dir = mod_directory+"\\mods.zip"
         print("Deleting the original mods...")
         filesInDir = glob.glob(mod_directory+"/*")
         for mod in filesInDir:
             os.remove(mod)
-        print("Downloading the `mods.zip`, from google drive.")
-        gdown.download(data["drive-url"]["main-mods-zip"], zipfile_dir, fuzzy=True)
-        print("Extracting `mods.zip` folder.")
-        with zipfile.ZipFile(zipfile_dir, 'r') as zip_file:
-            zip_file.extractall(mod_directory)
-        os.remove(zipfile_dir)
-        print(f"Downloaded, {mod_directory}!")
-        if add_shaders == 1:
-            os.remove(mod_directory+"\\"+data["mods-to-delete"]["with-shaders"])
-            print(f"Deleted, {data['mods-to-delete']['with-shaders']}")
-        elif add_shaders == 0:
-            for i in data["mods-to-delete"]["without-shaders"]:
-                os.remove(mod_directory+"\\"+i)
-                print(f"Deleted, {i}")
+        self.download_item(data["drive-url"]["main-mods-zip"], mod_directory, "mods.zip", add_shaders)
         messagebox.askokcancel(message="Mods are successfully updated in your mods folder!\nClosing the program, now.")
         self.master.destroy()
 

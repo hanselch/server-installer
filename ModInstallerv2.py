@@ -30,7 +30,7 @@ else:
 
 print(f"""
 -=====================================---
-Server Installers | v. {data['version']['main-build']}
+Server Installers | v. {data['version']}
 Hansel Chavez (\033[94m@tardiobscurus\033[0m in discord)
 -=====================================---
 """)

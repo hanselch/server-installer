@@ -22,11 +22,13 @@ This is a very simple program adding the following:
     - Expanding on servers, for your players to install the world
     - When downloading the world, it will immediately be set to the `saves` folder
 
-
-
 ## Installation
 
-You can install the main zip file on either the right side of this main page under the `v0.3-alpha` link or by clicking [here](https://github.com/hanselch/server-installer/releases)
+You can install the main zip file on either the right side of this main page under the `packages` link or by clicking [here](https://github.com/hanselch/server-installer/releases).
+
+Scroll down to find the `.zip` file, and click it to install.
+
+After installing the `.zip` file, **YOU MUST EXTRACT THE FOLDER THAT IS IN THE `.zip` FILE**. This will make local installation on packages less confusing for the program!
 
 ---
 
