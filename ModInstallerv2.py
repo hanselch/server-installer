@@ -1,16 +1,15 @@
-import sys,os,getpass
-import tkinter as tk
-
+import sys, os, getpass
 currentUser = getpass.getuser()
 currentDir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, f"{currentDir}\\preProgram")
 
-from getsettings import data # type: ignore
+import tkinter as tk
 import validatemodules # type: ignore
-
 validatemodules.get_requirements()
 
 import yaml
+
+from getsettings import data # type: ignore
 
 modsFolder = f"C:\\Users\\{currentUser}\\AppData\\Roaming\\.minecraft\\mods"
 if not os.path.isdir(modsFolder):
