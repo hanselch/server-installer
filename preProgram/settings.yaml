@@ -3,11 +3,11 @@ directories:
   saves-directory: ''
   shaderspack-directory: ''
 drive-url:
-  main-mods-zip: https://drive.google.com/file/d/1-2Fi1tn8YtFJC9DFV5CWgbdNkVGNaReC/view?usp=sharing
+  main-mods-zip: https://drive.google.com/file/d/1-Ld47PnrXa5bRRgmFv8kTcR949oPL-1E/view?usp=sharing
   world-download: ''
 mods-to-delete:
   no-shaders:
-  - iris-1.7.2+mc1.20.1.jar
+  - iris-1.7.5+mc1.20.1.jar
   - GeckoLibIrisCompat-Fabric-1.0.0.jar
   yes-shaders: DistantHorizons-2.2.1-a-1.20.1-forge-fabric.jar
 shaders-installed: false

@@ -3,7 +3,7 @@ from tkinter import ttk, filedialog, messagebox, END
 from getsettings import data
 import os
 import yaml # type: ignore
-import gdown, zipfile, shutil, glob # type: ignore
+import gdown, zipfile, glob # type: ignore
 import pathlib
 
 current_version = data["version"]
@@ -141,8 +141,11 @@ class App():
             saveMods =  messagebox.askyesno(message="To continue forwards, we need the mods folder to be empty. Would you like to save the current mods you have in the folder, in a seperate zip file?")
             if saveMods:
                 print("Making zip file for old mods")
-                shutil.make_archive("oldMods", 'zip', self.currentDir)
-                print(f"Made {self.currentDir}/oldMods.zip")
+                directory = pathlib.Path(mod_directory)
+                with zipfile.ZipFile("oldMods.zip", mode="w") as zip_file:
+                    for file_path in directory.iterdir():
+                        zip_file.write(file_path, arcname=file_path.name)
+                print(f"Made {self.currentDir}\\oldMods.zip")
                 print("Deleting mods in selected mods folder...")
                 for mod in filesInDir:
                     os.remove(mod)
