@@ -30,6 +30,8 @@ Scroll down to find the `.zip` file, and click it to install.
 
 After installing the `.zip` file, **YOU MUST EXTRACT THE FOLDER THAT IS IN THE `.zip` FILE**. This will make local installation on packages less confusing for the program!
 
+From this, it will automatically detect if there is any new versions up!
+
 ---
 
 For using the terminal, do the following.
@@ -46,3 +48,7 @@ python3 /path/to/Installer {version}
 
 > [!NOTE]
 > There will soon be beta testing versions in the future for code.
+
+> [!WARNING]
+> I do wanna keep in mind that this has been ONLY tested with Windows 10 and 11. I am not sure if this compatible with MacOS and Linux devices.
+> **CONTINUE AT YOUR OWN RISK**
