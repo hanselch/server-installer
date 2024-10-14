@@ -27,8 +27,8 @@ class App():
             row+=1
 
     def main_window(self, column):
-        self.master.title(f"Server Installer | v. {current_version}")
-        ttk.Label(self.master, text=f"Server Installer v. {current_version}", 
+        self.master.title(f"Server Installer | {current_version}")
+        ttk.Label(self.master, text=f"Server Installer {current_version}", 
                  font=("Arial", 15)).grid(row=0)
         ttk.Label(self.master, text="What would you like to do?").grid(column=column,row=1)
         def selected():
